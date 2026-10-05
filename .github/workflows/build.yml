@@ -7,7 +7,8 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
+    timeout-minutes: 60
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -20,33 +21,14 @@ jobs:
 
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
+        with:
+          log-accepted-android-sdk-licenses: false
 
-      - name: Fix gradlew permissions
+      - name: Grant gradlew execute permission
         run: chmod +x ./gradlew || true
 
       - name: Generate gradle wrapper
-        run: gradle wrapper --gradle-version 8.4
-
-      - name: Fix settings (resolve plugins)
-        run: |
-          cat > settings.gradle.kts << 'EOF'
-          pluginManagement {
-              repositories {
-                  google()
-                  mavenCentral()
-                  gradlePluginPortal()
-              }
-          }
-          dependencyResolutionManagement {
-              repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
-              repositories {
-                  google()
-                  mavenCentral()
-              }
-          }
-          rootProject.name = "Wififred"
-          include(":app")
-          EOF
+        run: gradle wrapper --gradle-version 7.6.4 || gradle wrapper --gradle-version 8.4 || true
 
       - name: Accept Android licenses
         run: yes | sdkmanager --licenses || true
@@ -55,6 +37,7 @@ jobs:
         run: ./gradlew assembleDebug --stacktrace --no-daemon
 
       - name: Upload APK
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: wififred-full-apk
