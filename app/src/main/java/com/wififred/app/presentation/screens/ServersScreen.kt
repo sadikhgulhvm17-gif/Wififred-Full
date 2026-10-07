@@ -142,7 +142,7 @@ fun ServerCard(
         }
 
         Spacer(Modifier.height(10.dp))
-        HorizontalDivider(color = DarkBackground)
+        Divider(color = DarkBackground)
         Spacer(Modifier.height(6.dp))
 
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
