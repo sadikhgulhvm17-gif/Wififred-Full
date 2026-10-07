@@ -8,23 +8,34 @@
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    
-    <!-- أذونات خدمة VPN والـ Foreground Service -->
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.NEARBY_WIFI_DEVICES"
+        android:usesPermissionFlags="neverForLocation"
+        tools:targetApi="tiramisu" />
+
+    <!-- خدمات خلفية -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
         android:name=".WififredApplication"
         android:allowBackup="true"
-        android:icon="@android:drawable/ic_menu_manage"
+        android:icon="@mipmap/ic_launcher"
         android:label="Wififred"
         android:supportsRtl="true"
         android:theme="@style/Theme.Wififred"
         tools:targetApi="34">
-        
-        <!-- سيتم إضافة الأنشطة (Activities) هنا لاحقاً -->
-        
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:label="Wififred">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
     </application>
 
 </manifest>
