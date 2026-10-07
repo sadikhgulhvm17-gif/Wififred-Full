@@ -1,6 +1,7 @@
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+    id("org.jetbrains.kotlin.kapt")
     id("com.google.dagger.hilt.android")
     id("com.google.devtools.ksp")
 }
@@ -20,7 +21,10 @@ android {
     }
 
     buildTypes {
-        release { isMinifyEnabled = false }
+        release {
+            isMinifyEnabled = false
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+        }
     }
 
     compileOptions {
@@ -39,11 +43,14 @@ android {
 
     buildFeatures { compose = true }
     composeOptions { kotlinCompilerExtensionVersion = "1.4.3" }
-
     lint {
         abortOnError = false
         checkReleaseBuilds = false
     }
+}
+
+kapt {
+    correctErrorTypes = true
 }
 
 dependencies {
@@ -60,9 +67,15 @@ dependencies {
     implementation("androidx.compose.material:material-icons-extended")
     implementation("androidx.navigation:navigation-compose:2.6.0")
 
-    implementation("com.google.dagger:hilt-android:2.48")
-    ksp("com.google.dagger:hilt-compiler:2.48")
+    // Hilt - 2.45 متوافق مع Kotlin 1.8
+    implementation("com.google.dagger:hilt-android:2.45")
+    kapt("com.google.dagger:hilt-compiler:2.45")
     implementation("androidx.hilt:hilt-navigation-compose:1.0.0")
+
+    // Room - 2.5.2
+    implementation("androidx.room:room-runtime:2.5.2")
+    implementation("androidx.room:room-ktx:2.5.2")
+    kapt("androidx.room:room-compiler:2.5.2")
 
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
