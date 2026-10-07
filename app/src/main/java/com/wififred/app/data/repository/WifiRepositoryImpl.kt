@@ -5,6 +5,7 @@ import android.net.wifi.WifiManager
 import com.wififred.app.domain.model.SecurityType
 import com.wififred.app.domain.model.WifiNetwork
 import com.wififred.app.domain.repository.WifiRepository
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -14,17 +15,15 @@ import javax.inject.Singleton
 
 @Singleton
 class WifiRepositoryImpl @Inject constructor(
-    private val context: Context
+    @ApplicationContext private val context: Context
 ) : WifiRepository {
 
     private val wifiManager: WifiManager? =
         context.applicationContext.getSystemService(Context.WIFI_SERVICE) as? WifiManager
 
     override fun scanNearbyNetworks(): Flow<List<WifiNetwork>> = callbackFlow {
-        // ملاحظة: الفحص الحقيقي يتطلب أذونات Runtime وسيتم إضافتها لاحقاً
-        // هنا نبث قائمة فارغة مبدئياً إلى أن يتم تطبيق المنطق الكامل
         trySend(emptyList())
-        awaitClose { /* لا شيء */ }
+        awaitClose { }
     }
 
     override fun getConnectedNetwork(): Flow<WifiNetwork?> = flowOf(null)
