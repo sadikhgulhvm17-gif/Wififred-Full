@@ -12,28 +12,24 @@ object DnsServer {
     private var running = false
     private var thread: Thread? = null
 
-    // سجلات DNS محلية
     private val localRecords = mutableMapOf<String, String>(
         "wififred.local" to "10.0.0.1",
         "test.local" to "192.168.1.100",
         "myserver.local" to "127.0.0.1"
     )
 
-    // DNS الخارجي للتحويل
     private const val UPSTREAM_DNS = "1.1.1.1"
-
-    fun isRunning(): Boolean = running
-
-    fun getPort(): Int = socket?.localPort ?: 0
-
-    fun getQueryCount(): Long = queryCount
 
     @Volatile
     private var queryCount: Long = 0
 
+    fun isRunning(): Boolean = running
+    fun getPort(): Int = socket?.localPort ?: 0
+    fun getQueryCount(): Long = queryCount
+
     suspend fun start(port: Int = 5353): Result<String> = withContext(Dispatchers.IO) {
         try {
-            if (running) return@withContext Result.success("DNS يعمل بالفعل على المنفذ $port")
+            if (running) return@withContext Result.success("DNS يعمل بالفعل")
 
             LogStore.info("DNS: بدء الخادم على المنفذ $port...")
             socket = DatagramSocket(port)
@@ -64,13 +60,11 @@ object DnsServer {
 
     suspend fun stop() = withContext(Dispatchers.IO) {
         running = false
-        try {
-            socket?.close()
-        } catch (_: Exception) {}
+        try { socket?.close() } catch (_: Exception) {}
         socket = null
         thread?.interrupt()
         thread = null
-        LogStore.info("DNS: تم إيقاف الخادم (استقبل $queryCount استعلام)")
+        LogStore.info("DNS: تم الإيقاف (استقبل $queryCount استعلام)")
     }
 
     private fun handleQuery(packet: DatagramPacket) {
@@ -92,7 +86,6 @@ object DnsServer {
             response.header.setFlag(Flags.QR.toInt())
             response.header.setFlag(Flags.RA.toInt())
 
-            // 1) ابحث في السجلات المحلية
             val localIp = localRecords[qname]
             if (localIp != null && qtype == Type.A) {
                 val record = ARecord(
@@ -107,10 +100,9 @@ object DnsServer {
                 return
             }
 
-            // 2) حوّل إلى DNS الخارجي
             try {
                 val resolver = SimpleResolver(UPSTREAM_DNS)
-                resolver.timeout = 5
+                resolver.setTimeout(5)
                 val upstreamQuery = Message.newQuery(question)
                 val upstreamResponse = resolver.send(upstreamQuery)
 
@@ -130,10 +122,7 @@ object DnsServer {
     private fun sendResponse(request: DatagramPacket, response: Message) {
         try {
             val bytes = response.toWire()
-            val reply = DatagramPacket(
-                bytes, bytes.size,
-                request.address, request.port
-            )
+            val reply = DatagramPacket(bytes, bytes.size, request.address, request.port)
             socket?.send(reply)
         } catch (e: Exception) {
             LogStore.error("DNS send error: ${e.message}")
